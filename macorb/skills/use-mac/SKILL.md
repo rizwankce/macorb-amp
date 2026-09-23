@@ -25,7 +25,8 @@ because recursive tool exclusion is not supported there
 1. Call `macorb_acquire` with the repository the Mac should clone (`github.com/owner/name`), or omit it for a blank project directory. Do not retry a non-retryable failure.
 2. The tool returns `runnerId`, `sessionId`, `registeredAt`, `ttlDeadline`, and `nextAction`. Readiness is the `registeredAt` timestamp, never elapsed time.
 3. Use Amp's **first-party** Agent-to-Agent / thread-creation tool to start a **child thread on that exact runner id**. Pass this thread as the parent. Preserve the user's requested mode. Ask the child to report its result back here when it finishes.
-4. Do not call `macorb_acquire` again for the same work. `macorb_status` if you need state; `macorb_stop` only when the user is done.
+4. If a wait on the child is cancelled or times out, that is normal: the child reports back to this thread as a message when it finishes. Wait for that message; do not start a second child.
+5. Do not call `macorb_acquire` again for the same work. `macorb_status` if you need state; `macorb_stop` only when the user is done.
 
 ## What the Mac child must return
 
@@ -40,7 +41,7 @@ Do not promise Amp Portals or Multiplayer on a runner thread; Amp documents neit
 
 If `macorb_acquire` returns `ok: false`, tell the user the `code` and `message`. If `retryable` is false, do not retry. Common codes:
 
-- `UNAUTHENTICATED` — they need `macorb login` (or `MACORB_TOKEN`).
+- `UNAUTHENTICATED` — on desktop they need `npx @macorb/cli login`. On the web or phone (an Amp orb) they need a token from MacOrb console **Settings → Amp plugin tokens**, saved as the Amp secret `MACORB_TOKEN`, then a new thread.
 - `AMP_KEY_NOT_SET` — they need to store an Amp API key (`PUT /me/amp-key` or the CLI).
 - `GITHUB_TOKEN_NOT_SET` — they named a repository but have no GitHub token on file.
 - `CAPACITY_REACHED` — they already hold a live Mac on a different project.
