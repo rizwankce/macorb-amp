@@ -53,15 +53,23 @@ Where a thread runs decides how the plugin finds your MacOrb token.
 npx @macorb/cli login
 ```
 
-**Web and phone threads** run in an Amp orb, a cloud machine. Store your token
-as an Amp secret, and every orb you start will receive it:
+**Web and phone threads** run in an Amp orb, a cloud machine, so they need a
+token that lives in Amp:
 
-```sh
-amp secrets set --user --secret MACORB_TOKEN
-```
+1. In the console, open **Settings → Amp plugin tokens** and choose
+   **Create token**. Copy it — MacOrb shows it once. It lasts until you revoke
+   it, and it can start and stop Macs but can't change your account.
+2. Save it as an Amp secret named `MACORB_TOKEN`, either at
+   [ampcode.com/settings](https://ampcode.com/settings) or, with the token
+   still copied, from a Mac terminal:
 
-Paste the token when asked. Secrets reach an orb when it starts, so begin a new
-thread afterwards.
+   ```sh
+   pbpaste | amp secrets set --user --secret MACORB_TOKEN --data-file -
+   ```
+
+3. Start a new thread. Orbs read secrets when they start.
+
+To cut a token off, revoke it in the same Settings section.
 
 ## Use it
 
@@ -93,7 +101,7 @@ separately from the Mac.
 
 | You see | What to do |
 |---|---|
-| `UNAUTHENTICATED` | Sign in again: `npx @macorb/cli login` on desktop, or update the `MACORB_TOKEN` secret for web and phone |
+| `UNAUTHENTICATED` | On desktop, sign in again: `npx @macorb/cli login`. On web or phone, check the `MACORB_TOKEN` secret holds a token that is still listed in console Settings, then start a new thread |
 | `AMP_KEY_NOT_SET` | Save your Amp API key under **Settings** in the console |
 | `GITHUB_TOKEN_NOT_SET` | You named a repository but haven't saved a GitHub token |
 | `CAPACITY_REACHED` | You already have a Mac for another project. Stop it first |
